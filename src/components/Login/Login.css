@@ -1,0 +1,384 @@
+/* Login pattern — two-column split per brandsync `corpus/patterns/login.md` */
+
+.login {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--bs-surface-base);
+  color: var(--bs-text-default);
+}
+
+/* ── Brand panel (left) ──────────────────────────────────────────────────── */
+.login__brand {
+  position: relative;
+  overflow: hidden;
+  padding: var(--bs-spacing-700);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    radial-gradient(circle at 20% 20%, var(--bs-brand-colors-purple-700) 0%, transparent 55%),
+    radial-gradient(circle at 80% 70%, var(--bs-brand-colors-cobalt-700) 0%, transparent 55%),
+    var(--bs-brand-950);
+  color: var(--bs-static-white);
+}
+
+.login__brand-mark {
+  position: relative;
+  z-index: 2;
+  width: var(--bs-spacing-600);
+  height: var(--bs-spacing-600);
+  border-radius: var(--bs-border-radius-150);
+  background: var(--bs-static-white);
+  color: var(--bs-brand-700);
+  font-weight: 700;
+  font-size: var(--bs-font-size-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+}
+
+.login__brand-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-spacing-150);
+}
+
+.login__brand-copy h2 {
+  font-size: var(--bs-text-style-display-size);
+  font-weight: var(--bs-text-style-display-weight);
+  line-height: var(--bs-text-style-display-line-height);
+  letter-spacing: var(--bs-text-style-display-letter-spacing);
+  color: var(--bs-static-white);
+  margin: 0;
+}
+
+.login__brand-copy p {
+  font-size: var(--bs-font-size-lg);
+  line-height: var(--bs-line-height-normal);
+  color: var(--bs-static-white);
+  opacity: 0.8;
+  margin: 0;
+}
+
+.login__brand-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.login__brand-orb--a {
+  width: 360px;
+  height: 360px;
+  background: var(--bs-brand-colors-magenta-500);
+  top: -80px;
+  right: -60px;
+}
+
+.login__brand-orb--b {
+  width: 420px;
+  height: 420px;
+  background: var(--bs-brand-colors-blue-500);
+  bottom: -140px;
+  left: -80px;
+}
+
+/* ── Form panel (right) ──────────────────────────────────────────────────── */
+.login__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--bs-spacing-400);
+  background: var(--bs-surface-base);
+}
+
+.login__form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-spacing-200);
+}
+
+.login__form-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-spacing-50);
+  margin-bottom: var(--bs-spacing-100);
+}
+
+.login__form-header h1 {
+  font-size: var(--bs-text-style-heading-1-size);
+  font-weight: var(--bs-text-style-heading-1-weight);
+  line-height: var(--bs-text-style-heading-1-line-height);
+  letter-spacing: var(--bs-text-style-heading-1-letter-spacing);
+  color: var(--bs-text-default);
+  margin: 0;
+}
+
+.login__form-header p {
+  font-size: var(--bs-font-size-md);
+  color: var(--bs-text-secondary);
+  margin: 0;
+}
+
+.login__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bs-spacing-100);
+  padding: var(--bs-spacing-150) var(--bs-spacing-200);
+  background: var(--bs-color-error-container);
+  color: var(--bs-text-error);
+  border: 1px solid var(--bs-border-error);
+  border-radius: var(--bs-border-radius-100);
+  font-size: var(--bs-font-size-sm);
+  line-height: var(--bs-line-height-normal);
+}
+
+.login__alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── BrandSync input field overrides (focus state) ───────────────────────── */
+.bs-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bs-spacing-50);
+  width: 100%;
+}
+
+.bs-input-label {
+  font-size: var(--bs-font-size-sm);
+  font-weight: 500;
+  line-height: var(--bs-font-size-xl);
+  color: var(--bs-text-default);
+}
+
+.bs-input-container {
+  display: flex;
+  align-items: center;
+  height: var(--bs-spacing-550);
+  padding: 0 var(--bs-spacing-150);
+  border: 1px solid var(--bs-border-default);
+  border-radius: var(--bs-border-radius-100);
+  background: var(--bs-surface-base);
+  gap: var(--bs-spacing-100);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.bs-input-container:focus-within {
+  border-color: var(--bs-color-primary-default);
+  box-shadow: 0 0 0 3px var(--bs-border-primary-focus);
+}
+
+.bs-input-field {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--bs-font-size-md);
+  line-height: var(--bs-font-size-2xl);
+  color: var(--bs-text-default);
+  width: 100%;
+}
+
+.bs-input-field::placeholder {
+  color: var(--bs-text-muted);
+}
+
+.bs-input-field:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.login__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bs-spacing-100);
+}
+
+.login__icon-btn {
+  background: transparent;
+  border: none;
+  padding: var(--bs-spacing-25);
+  color: var(--bs-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--bs-border-radius-50);
+  flex-shrink: 0;
+}
+
+.login__icon-btn:hover {
+  color: var(--bs-text-default);
+}
+
+.login__link {
+  color: var(--bs-text-link);
+  text-decoration: none;
+  font-size: var(--bs-font-size-sm);
+  font-weight: 500;
+}
+
+.login__link:hover {
+  text-decoration: underline;
+}
+
+.login__link--sm {
+  font-size: var(--bs-font-size-xs);
+}
+
+/* ── BrandSync checkbox (medium) ─────────────────────────────────────────── */
+.bs-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bs-spacing-100);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--bs-font-size-sm);
+  color: var(--bs-text-default);
+  user-select: none;
+  min-height: var(--bs-spacing-600);
+  padding: 0;
+}
+
+.bs-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.bs-checkbox__box {
+  position: relative;
+  border-radius: var(--bs-border-radius-50);
+  border: 2px solid var(--bs-border-default);
+  background: transparent;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bs-checkbox__box svg {
+  opacity: 0;
+  transition: all 0.15s ease;
+  display: block;
+}
+
+.bs-checkbox--md .bs-checkbox__box {
+  width: var(--bs-font-size-xl);
+  height: var(--bs-font-size-xl);
+}
+
+.bs-checkbox--md .bs-checkbox__box svg {
+  width: var(--bs-font-size-sm);
+  height: var(--bs-font-size-sm);
+}
+
+.bs-checkbox:hover .bs-checkbox__box {
+  border-color: var(--bs-color-neutral-default);
+}
+
+.bs-checkbox input:focus-visible ~ .bs-checkbox__box {
+  outline: 2px solid var(--bs-border-neutral-focus);
+  outline-offset: 2px;
+}
+
+.bs-checkbox input:checked ~ .bs-checkbox__box {
+  background: var(--bs-static-white);
+  border-color: var(--bs-color-primary-default);
+}
+
+.bs-checkbox input:checked ~ .bs-checkbox__box svg {
+  opacity: 1;
+}
+
+/* ── BrandSync primary button + submit ───────────────────────────────────── */
+.bs-btn {
+  padding: var(--bs-spacing-150) var(--bs-spacing-250);
+  border: none;
+  border-radius: var(--bs-border-radius-100);
+  font-weight: 600;
+  font-size: var(--bs-font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bs-spacing-100);
+  min-height: 44px;
+}
+
+.bs-btn-primary {
+  background: var(--bs-color-primary-default);
+  color: var(--bs-text-inverse);
+}
+
+.bs-btn-primary:hover:not(:disabled) {
+  background: var(--bs-color-primary-hover);
+}
+
+.bs-btn-primary:focus-visible {
+  outline: 3px solid var(--bs-border-primary);
+  outline-offset: 2px;
+  background: var(--bs-color-primary-focused);
+}
+
+.bs-btn-primary:active:not(:disabled) {
+  background: var(--bs-color-primary-pressed);
+}
+
+.bs-btn-primary:disabled {
+  background: var(--bs-surface-action-disabled);
+  color: var(--bs-text-on-disabled);
+  cursor: not-allowed;
+}
+
+.login__submit {
+  width: 100%;
+  margin-top: var(--bs-spacing-100);
+}
+
+.login__spinner {
+  width: var(--bs-font-size-md);
+  height: var(--bs-font-size-md);
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: login-spin 700ms linear infinite;
+}
+
+@keyframes login-spin {
+  to { transform: rotate(360deg); }
+}
+
+.login__footnote {
+  text-align: center;
+  font-size: var(--bs-font-size-sm);
+  color: var(--bs-text-secondary);
+  margin: var(--bs-spacing-100) 0 0;
+}
+
+/* ── Responsive (collapses to form-only per pattern spec) ────────────────── */
+@media (max-width: 900px) {
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .login__brand {
+    display: none;
+  }
+}

@@ -1,0 +1,176 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   Global theme — BrandSync tokens (strict, --bs-* prefix only)
+   Primary is routed through a --brand-* scale so a brand can be themed by
+   setting [data-brand="<palette>"] on <html>. Default palette: blue.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Brand scale (default → Blue) */
+  --brand-50: var(--bs-blue-50);
+  --brand-100: var(--bs-blue-100);
+  --brand-200: var(--bs-blue-200);
+  --brand-300: var(--bs-blue-300);
+  --brand-400: var(--bs-blue-400);
+  --brand-500: var(--bs-blue-500);
+  --brand-600: var(--bs-blue-600);
+  --brand-700: var(--bs-blue-700);
+  --brand-800: var(--bs-blue-800);
+  --brand-900: var(--bs-blue-900);
+  --brand-950: var(--bs-blue-950);
+
+  /* Primary semantic tokens → brand scale */
+  --bs-color-primary-default:         var(--brand-600);
+  --bs-color-primary-hover:           var(--brand-700);
+  --bs-color-primary-focused:         var(--brand-700);
+  --bs-color-primary-pressed:         var(--brand-800);
+  --bs-color-primary-container:       var(--brand-50);
+  --bs-color-primary-container-hover: var(--brand-100);
+
+  --bs-text-action:                   var(--brand-600);
+  --bs-text-action-hover:             var(--brand-700);
+  --bs-text-link:                     var(--brand-700);
+  --bs-icon-action:                   var(--brand-600);
+  --bs-icon-action-hover:             var(--brand-700);
+  --bs-border-primary:                var(--brand-500);
+  --bs-border-primary-hover:          var(--brand-600);
+  --bs-border-primary-focus:          var(--brand-600);
+  --bs-border-primary-pressed:        var(--brand-700);
+  --bs-surface-action:                var(--bs-color-primary-default);
+}
+
+[data-theme="dark"] {
+  --bs-color-primary-default:         var(--brand-400);
+  --bs-color-primary-hover:           var(--brand-300);
+  --bs-color-primary-focused:         var(--brand-300);
+  --bs-color-primary-pressed:         var(--brand-200);
+  --bs-color-primary-container:       var(--brand-950);
+  --bs-color-primary-container-hover: var(--brand-900);
+
+  --bs-text-action:                   var(--brand-400);
+  --bs-text-action-hover:             var(--brand-300);
+  --bs-text-link:                     var(--brand-400);
+  --bs-icon-action:                   var(--brand-400);
+  --bs-icon-action-hover:             var(--brand-300);
+  --bs-border-primary:                var(--brand-400);
+  --bs-border-primary-hover:          var(--brand-300);
+  --bs-border-primary-focus:          var(--brand-300);
+  --bs-border-primary-pressed:        var(--brand-200);
+}
+
+[data-brand="blue"] {
+  --brand-50: var(--bs-blue-50);
+  --brand-100: var(--bs-blue-100);
+  --brand-200: var(--bs-blue-200);
+  --brand-300: var(--bs-blue-300);
+  --brand-400: var(--bs-blue-400);
+  --brand-500: var(--bs-blue-500);
+  --brand-600: var(--bs-blue-600);
+  --brand-700: var(--bs-blue-700);
+  --brand-800: var(--bs-blue-800);
+  --brand-900: var(--bs-blue-900);
+  --brand-950: var(--bs-blue-950);
+}
+[data-brand="magenta"] {
+  --brand-50: var(--bs-magenta-50);
+  --brand-100: var(--bs-magenta-100);
+  --brand-200: var(--bs-magenta-200);
+  --brand-300: var(--bs-magenta-300);
+  --brand-400: var(--bs-magenta-400);
+  --brand-500: var(--bs-magenta-500);
+  --brand-600: var(--bs-magenta-600);
+  --brand-700: var(--bs-magenta-700);
+  --brand-800: var(--bs-magenta-800);
+  --brand-900: var(--bs-magenta-900);
+  --brand-950: var(--bs-magenta-950);
+}
+[data-brand="teal"] {
+  --brand-50: var(--bs-teal-50);
+  --brand-100: var(--bs-teal-100);
+  --brand-200: var(--bs-teal-200);
+  --brand-300: var(--bs-teal-300);
+  --brand-400: var(--bs-teal-400);
+  --brand-500: var(--bs-teal-500);
+  --brand-600: var(--bs-teal-600);
+  --brand-700: var(--bs-teal-700);
+  --brand-800: var(--bs-teal-800);
+  --brand-900: var(--bs-teal-900);
+  --brand-950: var(--bs-teal-950);
+}
+[data-brand="orange"] {
+  --brand-50: var(--bs-orange-50);
+  --brand-100: var(--bs-orange-100);
+  --brand-200: var(--bs-orange-200);
+  --brand-300: var(--bs-orange-300);
+  --brand-400: var(--bs-orange-400);
+  --brand-500: var(--bs-orange-500);
+  --brand-600: var(--bs-orange-600);
+  --brand-700: var(--bs-orange-700);
+  --brand-800: var(--bs-orange-800);
+  --brand-900: var(--bs-orange-900);
+  --brand-950: var(--bs-orange-950);
+}
+[data-brand="jade"] {
+  --brand-50: var(--bs-jade-50);
+  --brand-100: var(--bs-jade-100);
+  --brand-200: var(--bs-jade-200);
+  --brand-300: var(--bs-jade-300);
+  --brand-400: var(--bs-jade-400);
+  --brand-500: var(--bs-jade-500);
+  --brand-600: var(--bs-jade-600);
+  --brand-700: var(--bs-jade-700);
+  --brand-800: var(--bs-jade-800);
+  --brand-900: var(--bs-jade-900);
+  --brand-950: var(--bs-jade-950);
+}
+[data-brand="violet"] {
+  --brand-50: var(--bs-violet-50);
+  --brand-100: var(--bs-violet-100);
+  --brand-200: var(--bs-violet-200);
+  --brand-300: var(--bs-violet-300);
+  --brand-400: var(--bs-violet-400);
+  --brand-500: var(--bs-violet-500);
+  --brand-600: var(--bs-violet-600);
+  --brand-700: var(--bs-violet-700);
+  --brand-800: var(--bs-violet-800);
+  --brand-900: var(--bs-violet-900);
+  --brand-950: var(--bs-violet-950);
+}
+[data-brand="cobalt"] {
+  --brand-50: var(--bs-cobalt-50);
+  --brand-100: var(--bs-cobalt-100);
+  --brand-200: var(--bs-cobalt-200);
+  --brand-300: var(--bs-cobalt-300);
+  --brand-400: var(--bs-cobalt-400);
+  --brand-500: var(--bs-cobalt-500);
+  --brand-600: var(--bs-cobalt-600);
+  --brand-700: var(--bs-cobalt-700);
+  --brand-800: var(--bs-cobalt-800);
+  --brand-900: var(--bs-cobalt-900);
+  --brand-950: var(--bs-cobalt-950);
+}
+[data-brand="green"] {
+  --brand-50: var(--bs-green-50);
+  --brand-100: var(--bs-green-100);
+  --brand-200: var(--bs-green-200);
+  --brand-300: var(--bs-green-300);
+  --brand-400: var(--bs-green-400);
+  --brand-500: var(--bs-green-500);
+  --brand-600: var(--bs-green-600);
+  --brand-700: var(--bs-green-700);
+  --brand-800: var(--bs-green-800);
+  --brand-900: var(--bs-green-900);
+  --brand-950: var(--bs-green-950);
+}
+[data-brand="steel"] {
+  --brand-50: var(--bs-steel-50);
+  --brand-100: var(--bs-steel-100);
+  --brand-200: var(--bs-steel-200);
+  --brand-300: var(--bs-steel-300);
+  --brand-400: var(--bs-steel-400);
+  --brand-500: var(--bs-steel-500);
+  --brand-600: var(--bs-steel-600);
+  --brand-700: var(--bs-steel-700);
+  --brand-800: var(--bs-steel-800);
+  --brand-900: var(--bs-steel-900);
+  --brand-950: var(--bs-steel-950);
+}

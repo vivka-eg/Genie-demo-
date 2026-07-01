@@ -1,0 +1,61 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bs-spacing-300);
+}
+
+.app h1 {
+  font-size: var(--bs-text-style-heading-1-size);
+  font-weight: var(--bs-text-style-heading-1-weight);
+  line-height: var(--bs-text-style-heading-1-line-height);
+  letter-spacing: var(--bs-text-style-heading-1-letter-spacing);
+  margin: 0;
+}
+
+.card {
+  padding: var(--bs-spacing-400);
+  background-color: var(--bs-surface-raised);
+  border: var(--bs-border-width-thin) solid var(--bs-border-default);
+  border-radius: var(--bs-border-radius-200);
+  box-shadow: var(--bs-shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bs-spacing-200);
+}
+
+button {
+  border-radius: var(--bs-border-radius-100);
+  border: var(--bs-border-width-thin) solid transparent;
+  padding: var(--bs-spacing-100) var(--bs-spacing-200);
+  font-family: inherit;
+  font-size: var(--bs-text-style-label-lg-size);
+  font-weight: var(--bs-text-style-label-lg-weight);
+  background-color: var(--bs-button-primary-default);
+  color: var(--bs-text-on-action);
+  cursor: pointer;
+  transition: background-color 120ms var(--bs-easing-standard),
+    border-color 120ms var(--bs-easing-standard);
+}
+
+button:hover {
+  background-color: var(--bs-button-primary-hover);
+}
+
+button:focus-visible {
+  outline: var(--bs-border-width-medium) solid var(--bs-border-neutral-focus);
+  outline-offset: var(--bs-spacing-25);
+}
+
+button:active {
+  background-color: var(--bs-button-primary-pressed);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background-color: var(--bs-surface-inset);
+  padding: var(--bs-spacing-25) var(--bs-spacing-75);
+  border-radius: var(--bs-border-radius-50);
+  color: var(--bs-text-secondary);
+}
