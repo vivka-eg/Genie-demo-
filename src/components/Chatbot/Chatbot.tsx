@@ -17,6 +17,11 @@ import {
   WarningCircle,
   Warning,
   UserSwitch,
+  CaretDown,
+  Export,
+  Headset,
+  Ticket,
+  ChatCenteredDots,
 } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
 import genieIcon from './genie-icon.svg'
@@ -25,8 +30,8 @@ import './Chatbot.css'
 type Role = 'user' | 'bot'
 type WidgetKind = 'bar' | 'line' | 'table'
 type Confidence = 'verified' | 'high' | 'review' | 'limited' | 'escalated'
-type Message = { id: number; role: Role; text: string; widget?: WidgetKind; confidence?: Confidence }
-type Answer = { text: string; widget?: WidgetKind; confidence?: Confidence }
+type Message = { id: number; role: Role; text: string; widget?: WidgetKind; confidence?: Confidence; sources?: string[] }
+type Answer = { text: string; widget?: WidgetKind; confidence?: Confidence; sources?: string[] }
 
 // Confidence badge styling per level (see ConfidenceBadge).
 const CONFIDENCE: Record<Confidence, { label: string; tone: string; Icon: Icon }> = {
@@ -71,6 +76,7 @@ const ANSWERS: Record<string, Answer> = {
   'How is revenue performing?': {
     widget: 'line',
     confidence: 'high',
+    sources: ['Dashboard · Revenue KPI', 'Sales Overview chart', 'Sales by Region table'],
     text: `Revenue is **$53,000** this period — up **55%**, your fastest-growing metric.
 
 - **Trend** - +55% vs the previous period
@@ -81,6 +87,7 @@ const ANSWERS: Record<string, Answer> = {
   'How is user growth trending?': {
     widget: 'bar',
     confidence: 'high',
+    sources: ['Dashboard · New Users KPI', 'Active Users chart'],
     text: `User growth is healthy — **2,300 new users** (**+5%**), with monthly active users up **23% year-over-year**.
 
 - **New users** - 2,300 this period (+5%)
@@ -91,12 +98,14 @@ const ANSWERS: Record<string, Answer> = {
   'Which regions drive the most sales?': {
     widget: 'table',
     confidence: 'verified',
+    sources: ['Sales by Region table'],
     text: `Sales are led by a handful of markets — here's the full "Sales by Region" breakdown:`,
   },
 
   'Are we hitting our sales target?': {
     widget: 'line',
     confidence: 'verified',
+    sources: ['Sales Overview chart', 'Monthly target plan'],
     text: `Yes — you're **~4% above target** on the Sales Overview chart.
 
 - **Latest** - sales are running ahead of the target line
@@ -107,11 +116,13 @@ const ANSWERS: Record<string, Answer> = {
   'Why did new orders drop?': {
     widget: 'table',
     confidence: 'review',
+    sources: ['Dashboard · New Orders KPI', 'Sales by Region table'],
     text: `New orders came in at **1,462**, down **14%** — the only KPI trending down. The *cause* isn't conclusive from the dashboard alone, so this may need a closer look. Orders by region:`,
   },
 
   "What's the customer satisfaction score?": {
     confidence: 'verified',
+    sources: ['Dashboard · Satisfaction KPI'],
     text: `Customer satisfaction is at **87%**, up **+3%** this period.
 
 - **Trend** - steady improvement
@@ -122,12 +133,14 @@ const ANSWERS: Record<string, Answer> = {
   'Which region has the best conversion?': {
     widget: 'table',
     confidence: 'verified',
+    sources: ['Sales by Region table'],
     text: `The **United States** leads on conversion at **4.2%**, ahead of every other market:`,
   },
 
   'Compare this month to last month': {
     widget: 'bar',
     confidence: 'high',
+    sources: ['Dashboard · KPI cards', 'Active Users chart'],
     text: `Month-over-month, most metrics are up:
 
 - **Revenue** - +55%, the standout gain
@@ -138,6 +151,7 @@ const ANSWERS: Record<string, Answer> = {
 
 const DEFAULT_ANSWER: Answer = {
   confidence: 'limited',
+  sources: ['Dashboard overview'],
   text: `I don't have a confident answer for that yet, but here's the current snapshot from your dashboard:
 
 - **Revenue** - $53,000 (+55%)
@@ -148,15 +162,26 @@ const DEFAULT_ANSWER: Answer = {
 If you need specifics I can't cover, I can hand this to a human specialist.`,
 }
 
-// Response shown after a human escalation (personalised to the active brand).
-function escalationAnswer(brandName: string): Answer {
+// Responses after a human escalation (personalised to the active brand).
+function liveAgentAnswer(brandName: string): Answer {
   return {
     confidence: 'escalated',
-    text: `I've escalated this to a human specialist on the ${brandName} team.
+    text: `Connecting you to a live agent on the ${brandName} team.
 
-- **Ticket created** - your question and this conversation have been shared
-- **Response time** - a specialist typically replies within a few hours
-- **Meanwhile** - you can keep asking me other questions`,
+- **Status** - you're in the queue; an agent will join this chat shortly
+- **Context shared** - your question and this conversation are attached
+- **Meanwhile** - you can keep chatting with me`,
+  }
+}
+
+function ticketAnswer(brandName: string): Answer {
+  return {
+    confidence: 'escalated',
+    text: `I've created a support ticket for the ${brandName} team.
+
+- **Ticket** - your question and this conversation have been logged
+- **Response time** - the team typically replies within a few hours
+- **Updates** - you'll be notified by email as it progresses`,
   }
 }
 
@@ -318,6 +343,35 @@ function skeletonLayout(answer: Answer): number[] {
   return widths
 }
 
+// Column heights (%) for the chart skeleton — fixed pattern, no randomness.
+const SKEL_COLS = [46, 68, 54, 82, 62, 92, 72, 100, 78, 96]
+
+// Placeholder that mirrors the shape of the inline widget that's loading.
+function SkeletonWidget({ kind }: { kind: WidgetKind }) {
+  return (
+    <div className="gn-skel-widget">
+      <span className="gn-skel gn-skel--wtitle" />
+      {kind === 'table' ? (
+        <div className="gn-skel-table">
+          {Array.from({ length: 5 }).map((_, r) => (
+            <div className="gn-skel-row" key={r}>
+              {Array.from({ length: 4 }).map((_, c) => (
+                <span className="gn-skel gn-skel--cell" key={c} />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="gn-skel-chart">
+          {SKEL_COLS.map((h, i) => (
+            <span className="gn-skel gn-skel--col" key={i} style={{ height: `${h}%` }} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 let nextId = 1
 
 type ChatbotProps = {
@@ -339,6 +393,9 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   const [streaming, setStreaming] = useState(false)
   const [feedback, setFeedback] = useState<Record<number, 'up' | 'down'>>({})
   const [copiedId, setCopiedId] = useState<number | null>(null)
+  const [sourcesOpen, setSourcesOpen] = useState<Record<number, boolean>>({})
+  const [escalating, setEscalating] = useState(false)
+  const [ended, setEnded] = useState(false)
   const [asked, setAsked] = useState<string[]>([])
   const [width, setWidth] = useState(400)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -387,7 +444,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   // Auto-scroll to the newest message (also after a widget appears post-stream).
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, thinking, loading, streaming])
+  }, [messages, thinking, loading, streaming, escalating])
 
   // Focus the input when the panel opens.
   useEffect(() => {
@@ -440,7 +497,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   // Reveal the reply word-by-word, like a streaming response.
   function streamReply(answer: Answer) {
     const botId = nextId++
-    setMessages(m => [...m, { id: botId, role: 'bot', text: '', widget: answer.widget, confidence: answer.confidence }])
+    setMessages(m => [...m, { id: botId, role: 'bot', text: '', widget: answer.widget, confidence: answer.confidence, sources: answer.sources }])
     const words = answer.text.split(' ')
     let i = 0
     streamRef.current = window.setInterval(() => {
@@ -474,6 +531,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   function sendText(raw: string) {
     const text = raw.trim()
     if (!text || thinking || loading || streaming) return
+    setEscalating(false)
     setMessages(m => [...m, { id: nextId++, role: 'user', text }])
     setAsked(a => (a.includes(text) ? a : [...a, text]))
     setDraft('')
@@ -484,11 +542,34 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
     sendText(draft)
   }
 
-  // Human escalation flow — hand the conversation to a specialist.
+  // Human escalation flow — open the "how would you like to continue?" card.
   function escalate() {
     if (thinking || loading || streaming) return
-    setMessages(m => [...m, { id: nextId++, role: 'user', text: 'I’d like to talk to a human' }])
-    runAnswer(escalationAnswer(brandName))
+    setEscalating(true)
+  }
+
+  function connectLiveAgent() {
+    setEscalating(false)
+    setMessages(m => [...m, { id: nextId++, role: 'user', text: 'Connect me to a live agent' }])
+    runAnswer(liveAgentAnswer(brandName))
+  }
+
+  function createTicket() {
+    setEscalating(false)
+    setMessages(m => [...m, { id: nextId++, role: 'user', text: 'Create a support ticket' }])
+    runAnswer(ticketAnswer(brandName))
+  }
+
+  function endChat() {
+    setEscalating(false)
+    setThinking(false)
+    setLoading(false)
+    setStreaming(false)
+    if (streamRef.current) window.clearInterval(streamRef.current)
+    streamRef.current = null
+    timersRef.current.forEach(window.clearTimeout)
+    timersRef.current = []
+    setEnded(true)
   }
 
   function rate(id: number, value: 'up' | 'down') {
@@ -504,6 +585,20 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
     navigator.clipboard?.writeText(text)
     setCopiedId(id)
     window.setTimeout(() => setCopiedId(c => (c === id ? null : c)), 1500)
+  }
+
+  function toggleSources(id: number) {
+    setSourcesOpen(s => ({ ...s, [id]: !s[id] }))
+  }
+
+  // Tactile pop on the icon inside a feedback button (thumbs bounce directionally).
+  function popIcon(btn: HTMLElement, dir: 'up' | 'down' | 'none' = 'none') {
+    const icon = btn.querySelector('svg')
+    if (!icon) return
+    gsap.fromTo(icon, { scale: 0.5 }, { scale: 1, duration: 0.45, ease: 'back.out(4)' })
+    if (dir !== 'none') {
+      gsap.fromTo(icon, { y: dir === 'up' ? 6 : -6 }, { y: 0, duration: 0.45, ease: 'back.out(4)' })
+    }
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -526,6 +621,9 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
     setStreaming(false)
     setFeedback({})
     setCopiedId(null)
+    setSourcesOpen({})
+    setEscalating(false)
+    setEnded(false)
     setAsked([])
     inputRef.current?.focus()
   }
@@ -628,6 +726,32 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
                             <ConfidenceBadge level={m.confidence} />
                           </div>
                         )}
+                        {m.sources && m.sources.length > 0 && !isStreaming && (
+                          <div className="gn-sources">
+                            <button
+                              className="gn-sources__toggle"
+                              onClick={() => toggleSources(m.id)}
+                              aria-expanded={!!sourcesOpen[m.id]}
+                            >
+                              Sources
+                              <CaretDown
+                                size={13}
+                                weight="bold"
+                                className={`gn-sources__caret${sourcesOpen[m.id] ? ' gn-sources__caret--open' : ''}`}
+                              />
+                            </button>
+                            {sourcesOpen[m.id] && (
+                              <ul className="gn-sources__list">
+                                {m.sources.map((s, i) => (
+                                  <li key={i} className="gn-sources__item">
+                                    <Export size={15} weight="bold" />
+                                    {s}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
                       </div>
                       {!isStreaming && m.text && (
                         <div className="gn-feedback">
@@ -635,31 +759,31 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
                           <div className="gn-feedback__actions">
                             <button
                               className={`gn-fb-btn${feedback[m.id] === 'up' ? ' gn-fb-btn--active' : ''}`}
-                              onClick={() => rate(m.id, 'up')}
+                              onClick={e => { rate(m.id, 'up'); popIcon(e.currentTarget, 'up') }}
                               aria-label="Helpful"
                               aria-pressed={feedback[m.id] === 'up'}
                             >
-                              <ThumbsUp size={16} weight={feedback[m.id] === 'up' ? 'fill' : 'regular'} />
+                              <ThumbsUp size={16} weight={feedback[m.id] === 'up' ? 'fill' : 'bold'} />
                             </button>
                             <button
                               className={`gn-fb-btn${feedback[m.id] === 'down' ? ' gn-fb-btn--active' : ''}`}
-                              onClick={() => rate(m.id, 'down')}
+                              onClick={e => { rate(m.id, 'down'); popIcon(e.currentTarget, 'down') }}
                               aria-label="Not helpful"
                               aria-pressed={feedback[m.id] === 'down'}
                             >
-                              <ThumbsDown size={16} weight={feedback[m.id] === 'down' ? 'fill' : 'regular'} />
+                              <ThumbsDown size={16} weight={feedback[m.id] === 'down' ? 'fill' : 'bold'} />
                             </button>
                             <button
                               className="gn-fb-btn"
-                              onClick={() => copyMessage(m.id, m.text)}
+                              onClick={e => { copyMessage(m.id, m.text); popIcon(e.currentTarget) }}
                               aria-label={copiedId === m.id ? 'Copied' : 'Copy response'}
                             >
-                              {copiedId === m.id ? <Check size={16} /> : <Copy size={16} />}
+                              {copiedId === m.id ? <Check size={16} weight="bold" /> : <Copy size={16} weight="bold" />}
                             </button>
                             {m.confidence !== 'escalated' && (
                               <button
                                 className="gn-fb-btn gn-fb-btn--text"
-                                onClick={escalate}
+                                onClick={e => { popIcon(e.currentTarget); escalate() }}
                                 disabled={thinking || streaming}
                               >
                                 <UserSwitch size={16} weight="bold" />
@@ -721,9 +845,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
                         {skeletonLayout(pending).map((w, i) => (
                           <span key={i} className="gn-skel" style={{ width: `${w}%` }} />
                         ))}
-                        {pending.widget && (
-                          <span className={`gn-skel gn-skel--block gn-skel--${pending.widget}`} />
-                        )}
+                        {pending.widget && <SkeletonWidget kind={pending.widget} />}
                       </div>
                     </div>
                   </div>
@@ -732,8 +854,45 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
             )}
           </div>
 
+          {/* Ended notice — replaces the composer, conversation stays visible */}
+          {ended && (
+            <div className="gn-ended-bar">
+              <span className="gn-ended-bar__text">This chat has ended.</span>
+              <button className="gn-ended-bar__btn" onClick={newChat}>
+                <Plus size={14} weight="bold" />
+                Start new chat
+              </button>
+            </div>
+          )}
+
           {/* Composer */}
+          {!ended && (
           <div className="gn-composer">
+            {escalating && (
+              <>
+                <div className="gn-escalate-backdrop" onClick={() => setEscalating(false)} aria-hidden="true" />
+                <div className="gn-escalate-card" role="dialog" aria-label="Continue options">
+                  <p className="gn-escalate-card__title">How would you like to continue?</p>
+                  <button className="gn-escalate-card__primary" onClick={connectLiveAgent}>
+                    <Headset size={18} weight="bold" />
+                    Connect to a live agent
+                  </button>
+                  <p className="gn-escalate-card__hint">Or continue on your own</p>
+                  <button className="gn-escalate-card__option" onClick={() => setEscalating(false)}>
+                    <ChatCenteredDots size={16} weight="bold" />
+                    Continue chatting with Genie
+                  </button>
+                  <button className="gn-escalate-card__option" onClick={createTicket}>
+                    <Ticket size={16} weight="bold" />
+                    Create a ticket
+                  </button>
+                  <button className="gn-escalate-card__end" onClick={endChat}>
+                    <X size={16} weight="bold" />
+                    End chat
+                  </button>
+                </div>
+              </>
+            )}
             {kbVisible && (
               <div className="gn-kb">
                 <span className="gn-kb__icon" aria-hidden="true">
@@ -776,6 +935,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
               </div>
             </div>
           </div>
+          )}
         </aside>
     </>
   )
