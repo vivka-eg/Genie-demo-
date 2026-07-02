@@ -295,6 +295,29 @@ function ChatWidget({ kind }: { kind: WidgetKind }) {
   )
 }
 
+// Approximate the shape of an answer as skeleton bar widths (%), so the loading
+// placeholder is about as tall as the response that's coming.
+function skeletonLayout(answer: Answer): number[] {
+  const widths: number[] = []
+  for (const raw of answer.text.split('\n')) {
+    const t = raw.trim()
+    if (!t) continue
+    const isBullet = /^[-•]\s+/.test(t)
+    const clean = t.replace(/\*\*/g, '').replace(/^[-•]\s+/, '')
+    if (isBullet) {
+      // Bullets fill most of the width; only very short ones trail off.
+      widths.push(clean.length > 22 ? 100 : Math.max(84, Math.min(98, Math.round((clean.length / 24) * 100))))
+    } else {
+      const lineCount = Math.max(1, Math.ceil(clean.length / 30))
+      for (let i = 0; i < lineCount; i++) {
+        const last = i === lineCount - 1
+        widths.push(last ? Math.max(84, Math.min(98, Math.round(((clean.length - i * 30) / 30) * 100))) : 100)
+      }
+    }
+  }
+  return widths
+}
+
 let nextId = 1
 
 type ChatbotProps = {
@@ -310,6 +333,8 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   const [messages, setMessages] = useState<Message[]>([])
   const [draft, setDraft] = useState('')
   const [thinking, setThinking] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [pending, setPending] = useState<Answer | null>(null)
   const [kbVisible, setKbVisible] = useState(true)
   const [streaming, setStreaming] = useState(false)
   const [feedback, setFeedback] = useState<Record<number, 'up' | 'down'>>({})
@@ -321,11 +346,13 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   const panelRef = useRef<HTMLElement>(null)
   const resizingRef = useRef(false)
   const streamRef = useRef<number | null>(null)
+  const timersRef = useRef<number[]>([])
   const prevCount = useRef(0)
 
-  // Clear any running stream timer on unmount.
+  // Clear any running stream timer / pending phase timers on unmount.
   useEffect(() => () => {
     if (streamRef.current) window.clearInterval(streamRef.current)
+    timersRef.current.forEach(window.clearTimeout)
   }, [])
 
   // Drag the left edge to resize the panel width.
@@ -360,7 +387,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   // Auto-scroll to the newest message (also after a widget appears post-stream).
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, thinking, streaming])
+  }, [messages, thinking, loading, streaming])
 
   // Focus the input when the panel opens.
   useEffect(() => {
@@ -428,19 +455,29 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
     }, 35)
   }
 
+  // Loading sequence before a reply: Thinking… → skeleton → streamed answer.
+  function runAnswer(answer: Answer) {
+    setThinking(true)
+    timersRef.current.push(window.setTimeout(() => {
+      setThinking(false)
+      setPending(answer)
+      setLoading(true)
+      timersRef.current.push(window.setTimeout(() => {
+        setLoading(false)
+        setPending(null)
+        setStreaming(true)
+        streamReply(answer)
+      }, 1400))
+    }, 1600))
+  }
+
   function sendText(raw: string) {
     const text = raw.trim()
-    if (!text || thinking || streaming) return
+    if (!text || thinking || loading || streaming) return
     setMessages(m => [...m, { id: nextId++, role: 'user', text }])
     setAsked(a => (a.includes(text) ? a : [...a, text]))
     setDraft('')
-    setThinking(true)
-    const answer = ANSWERS[text] ?? DEFAULT_ANSWER
-    window.setTimeout(() => {
-      setThinking(false)
-      setStreaming(true)
-      streamReply(answer)
-    }, 3000)
+    runAnswer(ANSWERS[text] ?? DEFAULT_ANSWER)
   }
 
   function send() {
@@ -449,14 +486,9 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
 
   // Human escalation flow — hand the conversation to a specialist.
   function escalate() {
-    if (thinking || streaming) return
+    if (thinking || loading || streaming) return
     setMessages(m => [...m, { id: nextId++, role: 'user', text: 'I’d like to talk to a human' }])
-    setThinking(true)
-    window.setTimeout(() => {
-      setThinking(false)
-      setStreaming(true)
-      streamReply(escalationAnswer(brandName))
-    }, 1200)
+    runAnswer(escalationAnswer(brandName))
   }
 
   function rate(id: number, value: 'up' | 'down') {
@@ -484,9 +516,13 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
   function newChat() {
     if (streamRef.current) window.clearInterval(streamRef.current)
     streamRef.current = null
+    timersRef.current.forEach(window.clearTimeout)
+    timersRef.current = []
     setMessages([])
     setDraft('')
     setThinking(false)
+    setLoading(false)
+    setPending(null)
     setStreaming(false)
     setFeedback({})
     setCopiedId(null)
@@ -674,6 +710,24 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
                     </div>
                   </div>
                 )}
+                {loading && pending && (
+                  <div className="gn-turn gn-turn--bot">
+                    <div className="gn-msg gn-msg--bot">
+                      <div className="gn-msg__header">
+                        <img className="gn-msg__avatar-img" src={genieIcon} alt="" aria-hidden="true" />
+                        <span className="gn-msg__name">Genie</span>
+                      </div>
+                      <div className="gn-skel-lines" aria-hidden="true">
+                        {skeletonLayout(pending).map((w, i) => (
+                          <span key={i} className="gn-skel" style={{ width: `${w}%` }} />
+                        ))}
+                        {pending.widget && (
+                          <span className={`gn-skel gn-skel--block gn-skel--${pending.widget}`} />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -715,7 +769,7 @@ export default function Chatbot({ open, onClose, brandName = 'Genie' }: ChatbotP
                   className="gn-send"
                   aria-label="Send message"
                   onClick={send}
-                  disabled={!draft.trim() || thinking || streaming}
+                  disabled={!draft.trim() || thinking || loading || streaming}
                 >
                   <PaperPlaneRight size={16} weight="fill" />
                 </button>
